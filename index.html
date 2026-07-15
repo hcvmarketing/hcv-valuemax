@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#00529C">
+<title>HCV ValueMaX</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --blue:#00529C; --blue-dark:#003A6F; --blue-light:#E3F0FB;
+    --green:#1B873B; --green-light:#E6F4EA; --green-ink:#0B3D1C;
+    --grey:#60666E; --line:#DCE3EA; --ink:#181C21; --bg:#F2F5F9;
+    --card:#FFFFFF; --err:#C62828; --err-bg:#FBEAEA;
+    --tert:#EEF2F6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--ink); font-size:15px; line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:24px}
+  /* top bar */
+  .topbar{
+    background:var(--blue);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;
+    position:sticky;top:0;z-index:20;box-shadow:0 2px 6px rgba(0,0,0,.12)
+  }
+  .topbar .back{cursor:pointer;font-size:22px;line-height:1;width:24px;display:none}
+  .topbar.has-back .back{display:block}
+  .topbar h1{font-size:16px;font-weight:700;margin:0}
+  /* screens */
+  .screen{display:none;padding:16px}
+  .screen.active{display:block}
+  /* home */
+  .brandcard{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .brandcard .lock{padding:16px 20px 8px}
+  .brandcard .lock img{height:34px}
+  .brandcard .name{background:var(--blue);color:#fff;padding:14px 20px}
+  .brandcard .name b{font-size:17px;display:block}
+  .brandcard .name span{font-size:12px;color:#D3E6F8}
+  .navcard{
+    background:var(--card);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;gap:14px;align-items:center;
+    cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:transform .05s
+  }
+  .navcard:active{transform:scale(.99)}
+  .navcard .ic{width:48px;height:48px;border-radius:12px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .navcard .ic svg{width:26px;height:26px;stroke:var(--blue);fill:none;stroke-width:2}
+  .navcard .tx b{display:block;font-size:15px}
+  .navcard .tx span{font-size:12.5px;color:var(--grey)}
+  /* cards & sections */
+  .card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .sect-title{font-size:11px;font-weight:700;color:var(--blue-dark);text-transform:uppercase;letter-spacing:.03em;margin:0 0 10px}
+  .collapse-hd{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+  .collapse-hd .chev{transition:transform .2s;color:var(--blue)}
+  .collapse-hd.closed .chev{transform:rotate(-90deg)}
+  .collapse-bd{margin-top:12px}
+  .collapse-bd.hidden{display:none}
+  /* fields */
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:11px;color:var(--grey);margin-bottom:4px}
+  .field.err label{color:var(--err)}
+  .field .wrap{position:relative;display:flex;align-items:center}
+  .field input,.field select{
+    width:100%;padding:12px 12px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#fcfcfd;
+    color:var(--ink);font-family:inherit;appearance:none
+  }
+  .field.err input{border-color:var(--err)}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--blue)}
+  .field .suffix{position:absolute;right:12px;color:var(--grey);font-size:12px;pointer-events:none}
+  .field .hint{font-size:11px;color:var(--grey);margin-top:3px}
+  .field .hint.err{color:var(--err)}
+  .row2{display:flex;gap:8px}
+  .row2>*{flex:1}
+  /* slider */
+  .slider-val{font-weight:700;margin:6px 0 2px}
+  input[type=range]{width:100%;accent-color:var(--blue)}
+  /* hero */
+  .hero{background:var(--green-light);border-radius:16px;padding:16px;text-align:center;margin-bottom:14px}
+  .hero .cap{font-size:12px;color:var(--grey);font-weight:600}
+  .hero .big{font-size:30px;font-weight:800;color:var(--green);margin:2px 0}
+  .hero .exact{font-size:12px;color:var(--green-ink)}
+  .hero .sub{font-size:12px;color:var(--ink);margin-top:4px}
+  /* buttons */
+  .btn{
+    width:100%;padding:14px;border-radius:24px;border:none;font-size:15px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-bottom:10px
+  }
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:disabled{background:#9fb3c8}
+  .btn-outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+  .btn-row{display:flex;gap:8px}
+  .btn-row .btn{flex:1}
+  .actions{display:flex;gap:8px;margin-bottom:14px}
+  .actions .btn{margin-bottom:0}
+  /* notice */
+  .notice{background:var(--err-bg);color:var(--err);border-radius:10px;padding:10px 12px;font-size:12.5px;display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .notice.info{background:var(--blue-light);color:var(--blue-dark)}
+  .notice.warn{background:#FBF1DC;color:#5C4708}
+  /* tabs */
+  .tabs{display:flex;background:var(--tert);border-radius:10px;padding:3px;margin-bottom:14px}
+  .tabs .tab{flex:1;text-align:center;padding:9px 4px;border-radius:8px;font-size:12.5px;color:var(--grey);cursor:pointer;font-weight:600}
+  .tabs .tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+  /* sticky summary */
+  .sticky-sum{position:sticky;top:52px;z-index:15;background:var(--green-light);border-radius:0;
+    padding:8px 16px;display:flex;justify-content:space-between;align-items:center;margin:-16px -16px 14px}
+  .sticky-sum .l{font-size:12px;font-weight:600}
+  .sticky-sum .r{font-size:16px;font-weight:800;color:var(--green)}
+  .sticky-sum .r.neg{color:var(--err)}
+  /* results table */
+  .cmp{width:100%;border-collapse:collapse;font-size:12.5px}
+  .cmp th{background:var(--blue);color:#fff;padding:7px 6px;font-size:11px;text-align:right}
+  .cmp th:first-child{text-align:left}
+  .cmp td{padding:6px;border-bottom:1px solid var(--line);text-align:right}
+  .cmp td:first-child{text-align:left}
+  .cmp tr:nth-child(even){background:#F4F7FA}
+  .cmp td.green{color:var(--green);font-weight:700}
+  .cmp tr.bold td{font-weight:700}
+  .delta{display:inline-block;background:rgba(27,135,59,.12);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .delta.neg{background:rgba(198,40,40,.12);color:var(--err)}
+  /* bar chart */
+  .bar-item{margin-bottom:10px}
+  .bar-item .lab{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+  .bar-item .track{background:var(--tert);border-radius:8px;height:16px;overflow:hidden}
+  .bar-item .fill{height:16px;border-radius:8px;transition:width .5s}
+  /* donut legend */
+  .donut-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .legend{display:flex;flex-direction:column;gap:5px;font-size:11.5px}
+  .legend .li{display:flex;align-items:center;gap:6px}
+  .legend .sw{width:11px;height:11px;border-radius:3px}
+  /* dashboard */
+  .search-row{display:flex;gap:8px;margin-bottom:8px}
+  .search-row .sbox{flex:1;position:relative}
+  .search-row .sbox input{width:100%;padding:14px 12px 14px 40px;border:1px solid var(--line);border-radius:12px;font-size:15px;height:52px;font-family:inherit}
+  .search-row .sbox .si{position:absolute;left:12px;top:15px;color:var(--grey)}
+  .search-row .sortbtn{height:52px;border:1px solid var(--blue);color:var(--blue);background:#fff;border-radius:12px;padding:0 14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit}
+  .est-card{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .est-card .body{flex:1}
+  .est-card .chip{display:inline-block;background:var(--blue-light);color:var(--blue-dark);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;margin-bottom:4px}
+  .est-card .cn{font-weight:700;font-size:14px}
+  .est-card .meta{font-size:11px;color:var(--grey)}
+  .est-card .del{color:#B43C3C;background:none;border:none;font-size:20px;cursor:pointer;padding:6px}
+  .empty{text-align:center;padding:48px 24px;color:var(--grey)}
+  .empty svg{width:56px;height:56px;stroke:var(--line);fill:none;stroke-width:1.5;margin-bottom:12px}
+  /* dialog */
+  .overlay{position:fixed;inset:0;background:rgba(40,42,46,.75);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .overlay.show{display:flex}
+  .dialog{background:#fff;border-radius:20px;padding:20px;max-width:460px;width:100%;max-height:88vh;overflow:auto}
+  .dialog h3{margin:0 0 14px;color:var(--blue);text-align:center;font-size:18px}
+  .summary-stat{display:flex;justify-content:space-between;padding:5px 0;font-size:14px}
+  .summary-stat.hl{font-weight:700}
+  .summary-stat.hl .v{color:var(--green)}
+  .preview-img{width:100%;border-radius:8px;border:1px solid var(--line);margin-bottom:12px}
+  /* toast */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#2b2f34;color:#fff;padding:11px 18px;border-radius:24px;font-size:13px;z-index:80;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  .foot-note{font-size:11px;color:var(--grey);margin-top:4px}
+  .caption-note{font-size:12px;color:var(--grey);font-style:italic}
+  .install-hint{font-size:12px;color:var(--blue-dark);background:var(--blue-light);border-radius:10px;padding:10px 12px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar" id="topbar">
+    <span class="back" id="backBtn">&#8592;</span>
+    <h1 id="topTitle">Tata Motors CV | Better Always</h1>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="brandcard">
+      <div class="lock"><img id="lockimg" alt="Tata Motors Commercial Vehicles"></div>
+      <div class="name"><b>HCV ValueMaX</b><span>Fuel savings, extra revenue &amp; full business returns.</span></div>
+    </div>
+    <div class="navcard" onclick="go('fe')">
+      <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="10" height="16" rx="1"/><path d="M13 8h4v9a2 2 0 01-4 0"/><path d="M6 8h4"/></svg></div>
+      <div class="tx"><b>FE MaX &mdash; FE Series Trucks</b><span>FE Series: 7&ndash;10% better fuel efficiency. Monthly, yearly and multi-year diesel savings.</span></div>
+    </div>
+    <div class="navcard" onclick="go('hpt')">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 7-8"/><path d="M17 7h4v4"/></svg></div>
+      <div class="tx"><b>Revenue MaX &mdash; High Payload Trucks</b><span>Carry more, earn more. Extra freight revenue from additional payload.</span></div>
+    </div>
+    <div class="navcard" onclick="go('brt')">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h13"/><path d="M14 5l3 3-3 3"/><path d="M20 16H7"/><path d="M10 13l-3 3 3 3"/></svg></div>
+      <div class="tx"><b>BRT &mdash; Business Return Template</b><span>Detailed 2-product comparison: operating cost, EMI, profit and the Tata advantage.</span></div>
+    </div>
+    <div class="navcard" onclick="go('dash')">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16v12H4z"/><path d="M4 7l3-3h5l2 3"/></svg></div>
+      <div class="tx"><b>Saved Estimates</b><span>Dashboard of all saved customer estimates. Tap any entry to reopen it in its calculator.</span></div>
+    </div>
+    <div class="install-hint" id="installHint">
+      &#128241; <b>Tip:</b> Add this page to your home screen (browser menu &rarr; &ldquo;Add to Home screen&rdquo;) to use it like an app, even offline. Your saved estimates stay on this device.
+    </div>
+  </div>
+
+  <!-- FE -->
+  <div class="screen" id="screen-fe"></div>
+  <!-- HPT -->
+  <div class="screen" id="screen-hpt"></div>
+  <!-- BRT -->
+  <div class="screen" id="screen-brt"></div>
+  <!-- DASHBOARD -->
+  <div class="screen" id="screen-dash"></div>
+</div>
+
+<div class="overlay" id="overlay"><div class="dialog" id="dialog"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if(window.pdfjsLib){ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }
+</script>
+<script src="assets.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
